@@ -1,0 +1,48 @@
+{% extends "base_view.html" %}
+{% block content %}
+<h2>Manage Group: {{ group.group_name }}</h2>
+
+{% if is_admin %}
+<div class="badge badge-active" style="display: inline-block; margin-bottom: 16px;">ADMIN ONLY</div>
+
+<div class="card">
+    <h3>Group Settings</h3>
+    <form action="{{ url_for('groups.manage_group', group_id=group.group_id) }}" method="POST">
+        <input type="hidden" name="action" value="update_group_name">
+        <input type="text" name="group_name" value="{{ group.group_name }}" required>
+        <button type="submit" class="btn btn-outline">Update Name</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Add Member</h3>
+    <form action="{{ url_for('groups.manage_group', group_id=group.group_id) }}" method="POST">
+        <input type="hidden" name="action" value="add_member">
+        <input type="text" name="username" placeholder="Username" required>
+        <button type="submit" class="btn btn-primary">Add Member</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Members</h3>
+    <ul>
+        {% for m in members %}
+        <li style="margin-bottom: 8px;">
+            {{ m.username }} {% if m.user_id == group.created_by %}<strong>(Admin)</strong>{% endif %}
+            {% if is_admin and m.user_id != group.created_by %}
+            <form action="{{ url_for('groups.manage_group', group_id=group.group_id) }}" method="POST" style="display:inline;">
+                <input type="hidden" name="action" value="remove_member">
+                <input type="hidden" name="user_id" value="{{ m.user_id }}">
+                <button type="submit" style="color: red; border: none; background: none; cursor: pointer;">[Remove]</button>
+            </form>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% if is_admin %}
+<a href="{{ url_for('groups.delete_group', group_id=group.group_id) }}" class="btn btn-outline" style="color: red; border-color: red;">Delete Group</a>
+{% endif %}
+{% endblock %}

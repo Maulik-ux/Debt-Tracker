@@ -1,0 +1,42 @@
+{% extends "base_view.html" %}
+{% block content %}
+<h2>Spending History</h2>
+
+<div class="card">
+    <form method="GET" action="{{ url_for('history.index') }}" style="display: flex; gap: 12px; align-items: center;">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search description..." style="padding: 6px;">
+        <select name="group">
+            <option value="All">All Groups</option>
+            {% for g in groups %}
+            <option value="{{ g.group_name }}" {% if selected_group == g.group_name %}selected{% endif %}>{{ g.group_name }}</option>
+            {% endfor %}
+        </select>
+        <select name="sort">
+            <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Largest to smallest</option>
+            <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Smallest to largest</option>
+        </select>
+        <button type="submit" class="btn btn-outline">Filter</button>
+    </form>
+</div>
+
+{% for exp in expenses %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <strong>{{ exp.description }}</strong> <small>{{ exp.headline }}</small>
+        <br><small style="color: var(--color-grey);">{{ exp.group_name }} - {{ exp.expense_date }}</small>
+    </div>
+    <div style="text-align: right;">
+        <div class="{% if exp.amount >= 0 %}text-green{% else %}text-red{% endif %}" style="font-weight: bold;">
+            {% if exp.amount > 0 %}+{% endif %}{{ currency }}{{ "%.2f"|format(exp.amount) }}
+        </div>
+        <small style="color: var(--color-grey);">Your share: {{ currency }}{{ "%.2f"|format(exp.user_share) }}</small>
+    </div>
+</div>
+{% else %}
+<p style="color: var(--color-grey);">No expenses found.</p>
+{% endfor %}
+
+<div style="margin-top: 20px; font-weight: bold;">
+    Net this month: {{ currency }}{{ "%.2f"|format(net_this_month) }}
+</div>
+{% endblock %}

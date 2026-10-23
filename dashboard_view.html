@@ -1,0 +1,84 @@
+{% extends "base_view.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+<p style="color: var(--color-grey);">Welcome back, {{ username }}!</p>
+
+<div class="grid-4">
+    <div class="card card-red">
+        <div style="font-size: 12px;">TOTAL BALANCE</div>
+        <div style="font-size: 24px; font-weight: bold;" class="{% if net_balance >= 0 %}text-green{% else %}text-red{% endif %}">
+            {{ currency }}{{ "%.2f"|format(net_balance) }}
+        </div>
+        <div style="font-size: 11px; color: var(--color-grey);">across {{ total_groups_count }} groups</div>
+    </div>
+    <div class="card card-red">
+        <div style="font-size: 12px;">YOU OWE</div>
+        <div style="font-size: 24px; font-weight: bold;" class="text-red">{{ currency }}{{ "%.2f"|format(you_owe_total) }}</div>
+        <div style="font-size: 11px; color: var(--color-grey);">{{ active_owe_count }} active debts</div>
+    </div>
+    <div class="card card-green">
+        <div style="font-size: 12px;">YOU'RE OWED</div>
+        <div style="font-size: 24px; font-weight: bold;" class="text-green">{{ currency }}{{ "%.2f"|format(you_are_owed_total) }}</div>
+        <div style="font-size: 11px; color: var(--color-grey);">{{ active_owed_count }} active debts</div>
+    </div>
+    <div class="card card-grey">
+        <div style="font-size: 12px;">TRANSACTIONS THIS MONTH</div>
+        <div style="font-size: 24px; font-weight: bold;">{{ month_tx_count }}</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0;">Recent Activity</h3>
+            <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">+ Add</a>
+        </div>
+        {% for act in recent_activity %}
+        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
+            <strong>{{ act.payer_name }}</strong> paid {{ currency }}{{ "%.2f"|format(act.total_amount) }} - {{ act.description }}
+            <br><small style="color: var(--color-grey);">{{ act.group_name }} - {{ act.expense_date }}</small>
+        </div>
+        {% else %}
+        <p style="color: var(--color-grey);">No activity recorded yet.</p>
+        {% endfor %}
+    </div>
+
+    <div>
+        <div class="card" style="margin-bottom: 20px;">
+            <h3>Balances with Friends (Splitwise Style)</h3>
+            {% for pd in person_debts %}
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                <span><strong>{{ pd.name }}</strong></span>
+                {% if pd.type == 'OWES_YOU' %}
+                <span class="text-green" style="font-weight: bold;">owes you {{ currency }}{{ "%.2f"|format(pd.amount) }}</span>
+                {% elif pd.type == 'YOU_OWE' %}
+                <span class="text-red" style="font-weight: bold;">you owe {{ currency }}{{ "%.2f"|format(pd.amount) }}</span>
+                {% else %}
+                <span style="color: var(--color-grey);">settled up</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <p style="color: var(--color-grey);">All debts are settled!</p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h3>Group Balances</h3>
+            <p style="font-size: 12px; color: var(--color-grey);">{{ total_groups_count }} groups, sorted by balance</p>
+            {% for g in groups %}
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                <div>
+                    <strong>{{ g.group_name }}</strong>
+                    <div style="font-size: 11px; color: var(--color-grey);">{{ g.member_count }} members</div>
+                </div>
+                <div class="{% if g.amount >= 0 %}text-green{% else %}text-red{% endif %}" style="font-weight: bold;">
+                    {% if g.amount > 0 %}+{% endif %}{{ currency }}{{ "%.2f"|format(g.amount) }}
+                </div>
+            </div>
+            {% else %}
+            <p style="color: var(--color-grey);">No groups found. <a href="{{ url_for('groups.list_groups') }}">Create group</a></p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

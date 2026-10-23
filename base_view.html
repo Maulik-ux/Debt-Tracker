@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Debt Tracker Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        {% if session.get('user_id') %}
+        <div class="sidebar">
+            <div class="brand-header">Debt Tracker</div>
+            <div class="nav-label">NAVIGATIONS</div>
+            <ul class="nav-links">
+                <li class="{% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+                    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+                </li>
+                <li class="{% if 'groups' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('groups.list_groups') }}">Group</a>
+                </li>
+                <li class="{% if 'expenses' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('expenses.list_expenses') }}">Recent Activity</a>
+                </li>
+                <li class="{% if 'history' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('history.index') }}">Spending History</a>
+                </li>
+                <li class="{% if 'optimizer' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('optimizer.index') }}">Optimization</a>
+                </li>
+                <li class="{% if 'analytics' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('analytics.index') }}">Report Analytics</a>
+                </li>
+                <li class="{% if 'settings' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('settings.index') }}">Settings</a>
+                </li>
+            </ul>
+
+            <div class="user-profile-footer">
+                <div><strong>{{ session.get('username') }}</strong></div>
+                <div style="font-size: 12px; color: var(--text-muted);">{{ session.get('role', 'Member') }}</div>
+                <br>
+                <a href="{{ url_for('auth.logout') }}" style="color: var(--color-red); font-size: 13px;">Log Out</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
+
+<!-- Mobile Fullscreen Meta Tags -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Debt Tracker">
+
+<!-- Web App Manifest -->
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
+  }
+</script>

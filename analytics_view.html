@@ -1,0 +1,56 @@
+{% extends "base_view.html" %}
+{% block content %}
+<h2>Report Analytics</h2>
+<p style="color: var(--text-muted);">Analysis of your personal shares across spending categories.</p>
+
+<!-- Time Period Filters -->
+<div class="card" style="display: flex; gap: 10px; align-items: center;">
+    <span style="font-size: 13px; font-weight: bold; margin-right: 8px;">Timeframe:</span>
+    <a href="{{ url_for('analytics.index', period='week') }}" class="btn {% if selected_period == 'week' %}btn-primary{% else %}btn-outline{% endif %}">This Week</a>
+    <a href="{{ url_for('analytics.index', period='month') }}" class="btn {% if selected_period == 'month' %}btn-primary{% else %}btn-outline{% endif %}">This Month</a>
+    <a href="{{ url_for('analytics.index', period='year') }}" class="btn {% if selected_period == 'year' %}btn-primary{% else %}btn-outline{% endif %}">This Year</a>
+    <a href="{{ url_for('analytics.index', period='all') }}" class="btn {% if selected_period == 'all' %}btn-primary{% else %}btn-outline{% endif %}">All Time</a>
+</div>
+
+<div class="card card-grey">
+    <div style="font-size: 12px; color: var(--text-muted);">YOUR TOTAL SHARE IN PERIOD</div>
+    <div style="font-size: 28px; font-weight: bold; color: var(--accent-glow);">
+        {{ currency }}{{ "%.2f"|format(total_spent) }}
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Category Breakdown</h3>
+        {% if pie_chart_uri %}
+        <div style="text-align: center; margin-top: 10px;">
+            <img src="{{ pie_chart_uri }}" style="max-width: 100%; border-radius: 8px;">
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">No spending logged for this period.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Category Totals</h3>
+        {% for cat, amt in category_data.items() %}
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--card-border);">
+            <span><strong>{{ cat }}</strong></span>
+            <span style="font-weight: bold; color: var(--accent-glow);">{{ currency }}{{ "%.2f"|format(amt) }}</span>
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">No records found.</p>
+        {% endfor %}
+
+        <h3 style="margin-top: 24px;">Group Contribution Shares</h3>
+        {% for grp, amt in group_shares.items() %}
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--card-border);">
+            <span><strong>{{ grp }}</strong></span>
+            <span style="font-weight: bold;">{{ currency }}{{ "%.2f"|format(amt) }}</span>
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">No group transactions recorded.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

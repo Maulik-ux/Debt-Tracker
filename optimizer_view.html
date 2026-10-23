@@ -1,0 +1,46 @@
+{% extends "base_view.html" %}
+{% block content %}
+<h2>Optimization</h2>
+<p style="color: var(--color-grey);">Simplify who-owes-who across every group into the fewest possible transfers.</p>
+
+<div class="card">
+    <form method="GET" action="{{ url_for('optimizer.index') }}" style="display: flex; gap: 12px; align-items: center;">
+        <label>Select Group:</label>
+        <select name="group_id" onchange="this.form.submit()">
+            {% for g in groups %}
+            <option value="{{ g.group_id }}" {% if g.group_id == selected_group_id %}selected{% endif %}>{{ g.group_name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+{% if message %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Before ({{ before_count }} transactions)</h3>
+        {% if before_graph %}
+        <img src="{{ before_graph }}" style="width: 100%;">
+        {% else %}
+        <p>No active transactions to optimize.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>After ({{ after_count }} transactions)</h3>
+        {% if after_graph %}
+        <img src="{{ after_graph }}" style="width: 100%;">
+        {% else %}
+        <p>Click Optimize to view simplified graph network.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if selected_group_id %}
+<form method="POST" action="{{ url_for('optimizer.index', group_id=selected_group_id) }}" style="margin-top: 16px;">
+    <button type="submit" class="btn btn-primary">Optimize</button>
+</form>
+{% endif %}
+{% endblock %}

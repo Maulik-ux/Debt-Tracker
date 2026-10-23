@@ -1,0 +1,37 @@
+{% extends "base_view.html" %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>Recent Activity</h2>
+    <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">+ Add Expense</a>
+</div>
+
+{% for item in activity %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>{{ item.expense.description }}</strong> - Paid by {{ item.expense.payer_name }} (${{ "%.2f"|format(item.expense.total_amount) }})
+            <br><small style="color: var(--color-grey);">{{ item.expense.group_name }} - {{ item.expense.expense_date }}</small>
+        </div>
+        <div>
+            <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+            {% if item.can_edit %}
+            <a href="{{ url_for('expenses.delete_expense', expense_id=item.expense.expense_id) }}" style="color: red; font-size: 12px; margin-left: 8px;">Delete</a>
+            {% endif %}
+        </div>
+    </div>
+    <hr>
+    {% for debt in item.debts %}
+    <div style="font-size: 13px; display: flex; justify-content: space-between; margin-top: 4px;">
+        <span>{{ debt.debtor_name }} owes {{ debt.creditor_name }} ${{ "%.2f"|format(debt.amount) }}</span>
+        {% if debt.creditor_id == user_id and debt.status == 'ACTIVE' %}
+        <form action="{{ url_for('expenses.settle_debt', debt_id=debt.debt_id) }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-outline" style="padding: 2px 6px; font-size: 11px;">Mark as received</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="color: var(--color-grey);">No expenses found.</p>
+{% endfor %}
+{% endblock %}
